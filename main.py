@@ -70,8 +70,6 @@ class FileSorter:
         self.get_custom_preferences()
         if self.custom_preferences:
             for file_pattern, destination_folder in self.custom_preferences.items():
-                if not os.path.exists(destination_folder):
-                    os.makedirs(destination_folder)
                 for file in os.listdir(path):
                     if os.path.isfile(os.path.join(path, file)) and file_pattern.lower() in file.lower() and not file.endswith('.lnk'):
                         new_location = os.path.join(destination_folder, file)
