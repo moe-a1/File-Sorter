@@ -12,6 +12,8 @@ class FileSorter:
 
         self.custom_preferences = {}
         self.use_desktop_as_source = tk.BooleanVar()
+        self.ignore_extensions = []
+        self.ignore_shortcuts = tk.BooleanVar(value=True)
 
         self.create_tkinter_objs(40, 2)
 
@@ -26,6 +28,23 @@ class FileSorter:
         self.source_checkbox = tk.Checkbutton(self.window, text="Use desktop as source directory", variable=self.use_desktop_as_source)
         self.source_checkbox.pack()
 
+        self.ignore_ext_label = tk.Label(self.window, text="Enter extensions to ignore (comma-separated):")
+        self.ignore_ext_label.pack()
+        self.ignore_ext_entry = tk.Entry(self.window)
+        self.ignore_ext_entry.pack()
+
+        self.ignore_shortcuts_checkbox = tk.Checkbutton(self.window, text="Do not move shortcuts (Extension-based organization ONLY)", variable=self.ignore_shortcuts)
+        self.ignore_shortcuts_checkbox.pack()
+
+    def update_ignore_extensions(self):
+        self.ignore_extensions.clear()
+        if self.ignore_shortcuts.get():
+            self.ignore_extensions.append('lnk')
+
+        entry_extensions = self.ignore_ext_entry.get().split(',')
+        for ext in entry_extensions:
+            self.ignore_extensions.append(ext.strip())
+
     def get_path(self):
         if self.use_desktop_as_source.get():
             return os.path.join(os.path.expanduser("~"), "Desktop")
@@ -35,10 +54,11 @@ class FileSorter:
     def organize_by_extension(self):
         path = self.get_path()
         extensions_dir = {}
+        self.update_ignore_extensions()
         for file in os.listdir(path):
             file_path = os.path.join(path, file)
-            if os.path.isfile(file_path) and not file.endswith('.lnk'):
-                file_extension = os.path.splitext(file)[-1].lower()
+            file_extension = os.path.splitext(file)[-1].lower()
+            if os.path.isfile(file_path) and file_extension[1:] not in self.ignore_extensions:
                 if file_extension and file_extension not in extensions_dir:
                     ext_dir = os.path.join(path, file_extension[1:])
                     extensions_dir[file_extension] = ext_dir
