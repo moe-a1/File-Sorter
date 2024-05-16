@@ -11,12 +11,12 @@ class FileSorter:
         self.window.geometry("400x300")
 
         self.custom_preferences = {}
-        self.use_desktop_as_source = tk.BooleanVar()
-        self.ignore_extensions = []
         self.ignore_shortcuts = tk.BooleanVar(value=True)
-        self.exclude_files = []
-
+        self.use_desktop_as_source = tk.BooleanVar()
         self.create_tkinter_objs(40, 2)
+
+        self.load_options()
+        self.window.protocol("WM_DELETE_WINDOW", self.close)
 
     def create_tkinter_objs(self, button_width, button_height):
         self.label = tk.Label(self.window, text="Choose an organization method:")
@@ -113,6 +113,34 @@ class FileSorter:
                             shutil.move(os.path.join(path, file), new_location)
                             print(f"Moved {file} to {destination_folder}")
             messagebox.showinfo("Success", "Custom preference organization complete.")
+
+    def save_options(self):
+        if 'lnk' in self.ignore_extensions:
+            self.ignore_extensions.remove('lnk')
+        with open("options.txt", "w") as file:
+            file.write(",".join(self.ignore_extensions) + "\n")
+            file.write(",".join(self.exclude_files) + "\n")
+            file.write(str(self.ignore_shortcuts.get()) + "\n")
+            file.write(str(self.use_desktop_as_source.get()) + "\n")
+
+    def load_options(self):
+        try:
+            with open("options.txt", "r") as file:
+                options = file.readlines()
+                self.ignore_extensions = options[0].strip().split(",")
+                self.exclude_files = options[1].strip().split(",")
+                self.ignore_shortcuts.set(options[2].strip().lower() == 'true')
+                self.use_desktop_as_source.set(options[3].strip().lower() == 'true')
+
+                self.ignore_ext_entry.insert(0, ",".join(self.ignore_extensions))
+                self.exclude_files_entry.insert(0, ",".join(self.exclude_files))
+        except FileNotFoundError:
+            self.ignore_extensions = []
+            self.exclude_files = []
+
+    def close(self):
+        self.save_options()
+        self.window.destroy()
 
 
 def main():
