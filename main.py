@@ -23,24 +23,24 @@ class FileSorter:
         self.label.pack()
 
         self.extension_button = tk.Button(self.window, text="Organize by file extension", command=self.organize_by_extension, width=button_width, height=button_height)
-        self.extension_button.pack(expand=True)
+        self.extension_button.pack(pady=5)
         self.custom_button = tk.Button(self.window, text="Custom organization based on name patterns", command=self.organize_by_custom_preference, width=button_width, height=button_height)
-        self.custom_button.pack(expand=True)
-        self.source_checkbox = tk.Checkbutton(self.window, text="Use desktop as source directory", variable=self.use_desktop_as_source)
-        self.source_checkbox.pack()
+        self.custom_button.pack(pady=15)
 
         self.ignore_ext_label = tk.Label(self.window, text="Enter extensions to ignore (comma-separated):")
         self.ignore_ext_label.pack()
         self.ignore_ext_entry = tk.Entry(self.window)
         self.ignore_ext_entry.pack()
 
-        self.ignore_shortcuts_checkbox = tk.Checkbutton(self.window, text="Do not move shortcuts (Extension-based organization ONLY)", variable=self.ignore_shortcuts)
-        self.ignore_shortcuts_checkbox.pack()
-
         self.exclude_files_label = tk.Label(self.window, text="Enter file names to exclude (comma-separated):")
         self.exclude_files_label.pack()
         self.exclude_files_entry = tk.Entry(self.window, width=50)
         self.exclude_files_entry.pack(pady=10)
+
+        self.source_checkbox = tk.Checkbutton(self.window, text="Use desktop as source directory", variable=self.use_desktop_as_source)
+        self.source_checkbox.pack()
+        self.ignore_shortcuts_checkbox = tk.Checkbutton(self.window, text="Do not move shortcuts (Extension-based organization ONLY)", variable=self.ignore_shortcuts)
+        self.ignore_shortcuts_checkbox.pack()
 
     def update_ignore_extensions(self):
         self.ignore_extensions.clear()
