@@ -8,12 +8,13 @@ class FileSorter:
     def __init__(self, window):
         self.window = window
         self.window.title("File-Sorter")
-        self.window.geometry("400x200")
+        self.window.geometry("400x300")
 
         self.custom_preferences = {}
         self.use_desktop_as_source = tk.BooleanVar()
         self.ignore_extensions = []
         self.ignore_shortcuts = tk.BooleanVar(value=True)
+        self.exclude_files = []
 
         self.create_tkinter_objs(40, 2)
 
@@ -36,6 +37,11 @@ class FileSorter:
         self.ignore_shortcuts_checkbox = tk.Checkbutton(self.window, text="Do not move shortcuts (Extension-based organization ONLY)", variable=self.ignore_shortcuts)
         self.ignore_shortcuts_checkbox.pack()
 
+        self.exclude_files_label = tk.Label(self.window, text="Enter file names to exclude (comma-separated):")
+        self.exclude_files_label.pack()
+        self.exclude_files_entry = tk.Entry(self.window, width=50)
+        self.exclude_files_entry.pack(pady=10)
+
     def update_ignore_extensions(self):
         self.ignore_extensions.clear()
         if self.ignore_shortcuts.get():
@@ -44,6 +50,12 @@ class FileSorter:
         entry_extensions = self.ignore_ext_entry.get().split(',')
         for ext in entry_extensions:
             self.ignore_extensions.append(ext.strip())
+
+    def update_exclude_file_names(self):
+        self.exclude_files.clear()
+        entry_files = self.exclude_files_entry.get().split(',')
+        for file_name in entry_files:
+            self.exclude_files.append(file_name.strip())
 
     def get_path(self):
         if self.use_desktop_as_source.get():
@@ -55,10 +67,12 @@ class FileSorter:
         path = self.get_path()
         extensions_dir = {}
         self.update_ignore_extensions()
+        self.update_exclude_file_names()
         for file in os.listdir(path):
             file_path = os.path.join(path, file)
             file_extension = os.path.splitext(file)[-1].lower()
-            if os.path.isfile(file_path) and file_extension[1:] not in self.ignore_extensions:
+            file_name = os.path.splitext(file)[0]
+            if os.path.isfile(file_path) and file_extension[1:] not in self.ignore_extensions and file_name not in self.exclude_files:
                 if file_extension and file_extension not in extensions_dir:
                     ext_dir = os.path.join(path, file_extension[1:])
                     extensions_dir[file_extension] = ext_dir
@@ -89,12 +103,15 @@ class FileSorter:
         self.custom_preferences = {}
         self.get_custom_preferences()
         if self.custom_preferences:
+            self.update_exclude_file_names()
             for file_pattern, destination_folder in self.custom_preferences.items():
                 for file in os.listdir(path):
-                    if os.path.isfile(os.path.join(path, file)) and file_pattern.lower() in file.lower() and not file.endswith('.lnk'):
-                        new_location = os.path.join(destination_folder, file)
-                        shutil.move(os.path.join(path, file), new_location)
-                        print(f"Moved {file} to {destination_folder}")
+                    if os.path.isfile(os.path.join(path, file)):
+                        file_name = os.path.splitext(file)[0]
+                        if file_name not in self.exclude_files and file_pattern.lower() in file.lower() and not file.endswith('.lnk'):
+                            new_location = os.path.join(destination_folder, file)
+                            shutil.move(os.path.join(path, file), new_location)
+                            print(f"Moved {file} to {destination_folder}")
             messagebox.showinfo("Success", "Custom preference organization complete.")
 
 
